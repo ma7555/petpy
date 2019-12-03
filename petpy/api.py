@@ -15,14 +15,14 @@ from pandas.io.json import json_normalize
 import requests
 from urllib.parse import urljoin
 
+from petpy.exceptions import PetfinderInvalidCredentials, PetfinderInsufficientAccess, PetfinderResourceNotFound, \
+    PetfinderUnexpectedError, PetfinderInvalidParameters
 
 #################################################################################################################
 #
 # Petfinder Class
 #
 #################################################################################################################
-from petpy.exceptions import PetfinderInvalidCredentials, PetfinderInsufficientAccess, PetfinderResourceNotFound, \
-    PetfinderUnexpectedError, PetfinderInvalidParameters
 
 
 class Petfinder(object):
@@ -620,7 +620,7 @@ class Petfinder(object):
                                     'Authorization': 'Bearer ' + self._auth
                                 },
                                 params=params)
-                check_api_rate_exceeded(r.json())
+                _check_api_rate_exceeded(r.json())
                 organizations = r.json()['organizations']
 
                 max_pages = r.json()['pagination']['total_pages']
@@ -651,7 +651,7 @@ class Petfinder(object):
                                     'Authorization': 'Bearer ' + self._auth
                                 },
                                 params=params)
-                check_api_rate_exceeded(r.json())
+                _check_api_rate_exceeded(r.json())
                 organizations = r.json()['organizations']
                 max_pages = r.json()['pagination']['total_pages']
                 pages = _check_pages_api_limit(pages)
@@ -988,6 +988,7 @@ def _coerce_to_dataframe(results):
 
     return results_df
 
+
 def _check_pages_api_limit(max_pages):
     r"""
     Internal function for checking number of pages requested to comply with api quota.
@@ -1013,6 +1014,7 @@ def _check_pages_api_limit(max_pages):
 
     return max_pages
 
+
 def _check_api_rate_exceeded(r, exit_loop=False):
     r"""
     Internal function for catching api exceeded error.
@@ -1026,6 +1028,7 @@ def _check_api_rate_exceeded(r, exit_loop=False):
     -------
     None
         raises an error and terminates the program
+
     """
     if isinstance(r, dict):
         if 'status' in r.keys() and r['status'] == 429:
